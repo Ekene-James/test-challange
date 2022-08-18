@@ -73,7 +73,7 @@ const vaccinationSchema = new mongoose.Schema(
   {
     YearWeekISO: { type: String, required: true },
     FirstDose: { type: Number, required: true },
-    FirstDoseRefused: { type: String, required: true },
+    FirstDoseRefused: { type: String },
     SecondDose: { type: Number, required: true },
     DoseAdditional1: { type: Number, required: true },
     DoseAdditional2: { type: Number, required: true },

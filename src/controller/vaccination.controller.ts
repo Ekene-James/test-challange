@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import { CreateVaccinationtInput } from "../schema/vaccine.schema";
-import { createVaccination } from "../services/vaccination.service";
-import { AddAdvResultToRes } from "../utils/addAdvResultToRes";
+import {
+  createVaccination,
+  findVaccinations,
+} from "../services/vaccination.service";
 
 export const createVaccinationHandler = async (
   req: Request<{}, {}, CreateVaccinationtInput["body"]>,
@@ -15,9 +17,9 @@ export const createVaccinationHandler = async (
   });
 };
 
-export async function getVaccinationsHandler(
-  req: Request,
-  res: AddAdvResultToRes
-) {
-  return res.status(200).json();
+export async function getVaccinationsHandler(req: Request, res: Response) {
+  const vaccinationSummary = await findVaccinations(req.query);
+  return res.status(200).json({
+    summary: vaccinationSummary,
+  });
 }

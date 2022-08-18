@@ -11,9 +11,7 @@ const payload = {
     FirstDose: number({
       required_error: "First dose is required",
     }),
-    FirstDoseRefused: string({
-      required_error: "First dose refused is required",
-    }),
+    FirstDoseRefused: string(),
     SecondDose: number({
       required_error: "second dose is required",
     }),
