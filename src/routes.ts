@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Express, Request, Response } from "express";
 import {
   createVaccinationHandler,
@@ -36,6 +37,7 @@ function routes(app: Express) {
   app.post(
     "/api/create-vaccination",
     validate(createVaccinationSchema),
+    // @ts-ignore
     createVaccinationHandler
   );
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import mongoose from "mongoose";
 import createServer from "../utils/server";
 import supertest from "supertest";
@@ -45,6 +46,40 @@ const userInput = {
   Vaccine: "JANSS",
   Denominator: 34568,
 };
+const summaryPayload = {
+  summary: [
+    {
+      NumberDosesReceived: 5,
+      weekStart: "2020-W10",
+      weekEnd: "2020-W15",
+    },
+    {
+      NumberDosesReceived: 5,
+      weekStart: "2020-W20",
+      weekEnd: "2020-W25",
+    },
+    {
+      NumberDosesReceived: 5,
+      weekStart: "2020-W30",
+      weekEnd: "2020-W35",
+    },
+  ],
+};
+const summaryPayload1 = {
+  summary: [],
+};
+const query = {
+  c: "AT",
+  dateFrom: "2020-W10",
+  dateTo: "2020-W50",
+  range: "5",
+};
+const query1 = {
+  c: "AT",
+  dateFrom: "2017-W10",
+  dateTo: "2017-W50",
+  range: "5",
+};
 
 describe("vaccination", () => {
   describe("health check", () => {
@@ -82,7 +117,7 @@ describe("vaccination", () => {
           .spyOn(VaccinationService, "createVaccination")
           .mockRejectedValueOnce("Oh no! :(");
 
-        const { statusCode } = await supertest(createServer())
+        const { statusCode } = await supertest(app)
           .post("/api/create-vaccination")
           .send(userInput);
 
@@ -90,6 +125,39 @@ describe("vaccination", () => {
 
         expect(createVaccinationServiceMock).toHaveBeenCalled();
       });
+    });
+  });
+  describe("find vaccination summary", () => {
+    it("should return a vaccination summary from querry params", async () => {
+      const getVaccinationSummaryMock = jest
+        .spyOn(VaccinationService, "findVaccinations")
+        // @ts-ignore
+        .mockReturnValueOnce(JSON.stringify(summaryPayload));
+
+      const { body, statusCode } = await supertest(app).get(
+        "/api/vaccine-summary?c=AT&dateFrom=2020-W10&dateTo=2020-W50&range=5"
+      );
+      const { summary } = body;
+
+      expect(statusCode).toBe(200);
+      expect(summary).toEqual(JSON.stringify(summaryPayload));
+      expect(getVaccinationSummaryMock).toHaveBeenCalledWith(query);
+    });
+
+    it("should return an empty vaccination summary array", async () => {
+      const getVaccinationSummaryMock = jest
+        .spyOn(VaccinationService, "findVaccinations")
+        // @ts-ignore
+        .mockReturnValueOnce(JSON.stringify(summaryPayload1));
+
+      const { body, statusCode } = await supertest(app).get(
+        "/api/vaccine-summary?c=AT&dateFrom=2017-W10&dateTo=2017-W50&range=5"
+      );
+
+      const { summary } = body;
+      expect(statusCode).toBe(200);
+      expect(summary).toEqual(JSON.stringify(summaryPayload1));
+      expect(getVaccinationSummaryMock).toHaveBeenCalledWith(query1);
     });
   });
 });

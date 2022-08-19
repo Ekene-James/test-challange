@@ -9,10 +9,10 @@ export function customLoop(
   year: number
 ): returnData {
   const boundaryRange: string[] = [];
-  let skip: number = 0;
+  let skip = 0;
   for (let i = startWeek; i <= endWeek; i += rangeNum) {
     const currentNum: string = i < 10 ? `0${i}` : `${i}`;
-    const result: string = `${year}-W${currentNum}`;
+    const result = `${year}-W${currentNum}`;
     boundaryRange.push(result);
     //if all the weeks in a year, Check where the last loop stops to determine skip
     if (endWeek === 53 && i + rangeNum > 53) {

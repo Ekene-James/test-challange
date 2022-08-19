@@ -7,7 +7,7 @@ import {
 import logger from "../utils/logger";
 
 export const createVaccinationHandler = async (
-  req: Request<{}, {}, CreateVaccinationtInput["body"]>,
+  req: Request<CreateVaccinationtInput["body"]>,
   res: Response
 ) => {
   const body = req.body;
