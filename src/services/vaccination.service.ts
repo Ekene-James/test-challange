@@ -4,7 +4,7 @@ import VaccinationModel, {
 } from "../models/vaccination.model";
 import logger from "../utils/logger";
 import { FilterQuery } from "mongoose";
-import { customLoop } from "../utils/loopFunc";
+import { customLoop, returnData } from "../utils/loopFunc";
 
 interface Query {
   c: string;
@@ -18,9 +18,9 @@ export async function createVaccination(input: VaccinationInput) {
     const result = await VaccinationModel.create(input);
 
     return result;
-  } catch (e) {
+  } catch (e: any) {
     logger.error(e);
-    return e;
+    throw new Error(e);
   }
 }
 
@@ -42,26 +42,44 @@ export async function findVaccinations(query: FilterQuery<Query>) {
   //if start year !== end year, then it spans through more than one year
 
   if (startYear === endYear) {
-    boundaryRange = customLoop(startWeek, endWeek, rangeNum, startYear);
+    const loop: returnData = customLoop(
+      startWeek,
+      endWeek,
+      rangeNum,
+      startYear
+    );
+    const { theRange } = loop;
+    boundaryRange = [...theRange];
   } else {
     const baseCase: number = endYear - startYear + 1;
     let counter: number = 1;
     let curentYr: number = startYear;
+    let skipYr: number = 0;
 
     function calculateInteryear(strtWk: number, endWk: number, rangeN: number) {
       if (counter <= baseCase) {
         if (counter === 1) {
           //when its the first yr
-          const loop: string[] = customLoop(strtWk, 53, rangeN, curentYr);
-          boundaryRange = [...boundaryRange, ...loop];
+          const loop: returnData = customLoop(strtWk, 53, rangeN, curentYr);
+          const { skip, theRange } = loop;
+          boundaryRange = [...boundaryRange, ...theRange];
+          skipYr = skip;
         } else if (counter === baseCase) {
           //when its the last yr
-          const loop: string[] = customLoop(1, endWk, rangeN, curentYr);
-          boundaryRange = [...boundaryRange, ...loop];
+          const loop: returnData = customLoop(
+            1 + skipYr,
+            endWk,
+            rangeN,
+            curentYr
+          );
+          const { theRange } = loop;
+          boundaryRange = [...boundaryRange, ...theRange];
         } else {
           //when its the middle yr
-          const loop: string[] = customLoop(1, 53, rangeN, curentYr);
-          boundaryRange = [...boundaryRange, ...loop];
+          const loop: returnData = customLoop(1 + skipYr, 53, rangeN, curentYr);
+          const { skip, theRange } = loop;
+          boundaryRange = [...boundaryRange, ...theRange];
+          skipYr = skip;
         }
         counter += 1;
         curentYr += 1;
@@ -125,8 +143,8 @@ export async function findVaccinations(query: FilterQuery<Query>) {
     ]);
 
     return result;
-  } catch (e) {
+  } catch (e: any) {
     logger.error(e);
-    throw e;
+    throw new Error(e);
   }
 }
